@@ -6,7 +6,10 @@ class SSRThread : public QThread
 {
     Q_OBJECT
 public:
-    enum class SSR_WORK_MODE{TCP_ONLY=0,UDP_ONLY=1};
+    enum class SSR_WORK_MODE {
+        TCP_ONLY = 0,
+        TCP_AND_UDP = 1
+    };
     explicit SSRThread() = default;
     explicit SSRThread(int localPort,
         int remotePort,
