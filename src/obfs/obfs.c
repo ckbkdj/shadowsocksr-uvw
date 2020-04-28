@@ -2,10 +2,12 @@
 
 #include "auth.h"
 #include "auth_chain.h"
+#include "auth_akarin.h"
 #include "crc32.h"
 #include "encrypt.h"
 #include "http_simple.h"
 #include "obfsutil.h"
+#include "verify.h"
 #include "ssrutils.h"
 #include "tls1.2_ticket.h"
 
@@ -93,7 +95,40 @@ obfs_class* new_obfs_class(const char* plugin_name)
         plugin->client_decode = tls12_ticket_auth_client_decode;
 
         return plugin;
-    } else if (strcmp(plugin_name, "auth_sha1") == 0) {
+    }
+    else if (strcmp(plugin_name, "verify_simple") == 0) {
+        obfs_class * plugin = (obfs_class*)malloc(sizeof(obfs_class));
+        plugin->init_data = init_data;
+        plugin->new_obfs = verify_simple_new_obfs;
+        plugin->get_overhead = get_overhead;
+        plugin->get_server_info = get_server_info;
+        plugin->set_server_info = set_server_info;
+        plugin->dispose = verify_simple_dispose;
+
+        plugin->client_pre_encrypt = verify_simple_client_pre_encrypt;
+        plugin->client_post_decrypt = verify_simple_client_post_decrypt;
+        plugin->client_udp_pre_encrypt = NULL;
+        plugin->client_udp_post_decrypt = NULL;
+
+        return plugin;
+    }
+    else if (strcmp(plugin_name, "auth_simple") == 0) {
+        obfs_class * plugin = (obfs_class*)malloc(sizeof(obfs_class));
+        plugin->init_data = auth_simple_init_data;
+        plugin->new_obfs = auth_simple_new_obfs;
+        plugin->get_overhead = get_overhead;
+        plugin->get_server_info = get_server_info;
+        plugin->set_server_info = set_server_info;
+        plugin->dispose = auth_simple_dispose;
+
+        plugin->client_pre_encrypt = auth_simple_client_pre_encrypt;
+        plugin->client_post_decrypt = auth_simple_client_post_decrypt;
+        plugin->client_udp_pre_encrypt = NULL;
+        plugin->client_udp_post_decrypt = NULL;
+
+        return plugin;
+    }
+    else if (strcmp(plugin_name, "auth_sha1") == 0) {
         obfs_class* plugin = (obfs_class*)malloc(sizeof(obfs_class));
         plugin->init_data = auth_simple_init_data;
         plugin->new_obfs = auth_simple_new_obfs;
@@ -241,6 +276,38 @@ obfs_class* new_obfs_class(const char* plugin_name)
         plugin->client_post_decrypt = auth_chain_a_client_post_decrypt;
         plugin->client_udp_pre_encrypt = auth_chain_a_client_udp_pre_encrypt;
         plugin->client_udp_post_decrypt = auth_chain_a_client_udp_post_decrypt;
+
+        return plugin;
+    }
+    else if (strcmp(plugin_name, "auth_akarin_rand") == 0) {
+        obfs_class *plugin = (obfs_class *) malloc(sizeof(obfs_class));
+        plugin->init_data = auth_akarin_rand_init_data;
+        plugin->new_obfs = auth_akarin_rand_new_obfs;
+        plugin->get_overhead = auth_akarin_rand_get_overhead;
+        plugin->get_server_info = get_server_info;
+        plugin->set_server_info = auth_akarin_rand_set_server_info;
+        plugin->dispose = auth_akarin_rand_dispose;
+
+        plugin->client_pre_encrypt = auth_akarin_rand_client_pre_encrypt;
+        plugin->client_post_decrypt = auth_akarin_rand_client_post_decrypt;
+        plugin->client_udp_pre_encrypt = auth_akarin_rand_client_udp_pre_encrypt;
+        plugin->client_udp_post_decrypt = auth_akarin_rand_client_udp_post_decrypt;
+
+        return plugin;
+    }
+    else if (strcmp(plugin_name, "auth_akarin_spec_a") == 0) {
+        obfs_class *plugin = (obfs_class *) malloc(sizeof(obfs_class));
+        plugin->init_data = auth_akarin_spec_a_init_data;
+        plugin->new_obfs = auth_akarin_spec_a_new_obfs;
+        plugin->get_overhead = auth_akarin_spec_a_get_overhead;
+        plugin->get_server_info = get_server_info;
+        plugin->set_server_info = auth_akarin_spec_a_set_server_info;
+        plugin->dispose = auth_akarin_spec_a_dispose;
+
+        plugin->client_pre_encrypt = auth_akarin_rand_client_pre_encrypt;
+        plugin->client_post_decrypt = auth_akarin_rand_client_post_decrypt;
+        plugin->client_udp_pre_encrypt = auth_akarin_rand_client_udp_pre_encrypt;
+        plugin->client_udp_post_decrypt = auth_akarin_rand_client_udp_post_decrypt;
 
         return plugin;
     }

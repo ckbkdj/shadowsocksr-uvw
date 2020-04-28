@@ -86,8 +86,8 @@ server_info_t ConnectionContext::construct_obfs(CipherEnv& cipherEnv, ObfsClass&
         };
         e_ctx = { reinterpret_cast<struct enc_ctx*>(malloc(sizeof(struct enc_ctx))), encCtxRelease };
         d_ctx = { reinterpret_cast<struct enc_ctx*>(malloc(sizeof(struct enc_ctx))), encCtxRelease };
-        enc_ctx_init(&cipherEnv.cipher, e_ctx.get(), 1);
-        enc_ctx_init(&cipherEnv.cipher, d_ctx.get(), 0);
+        enc_ctx_init(&cipherEnv.cipher, e_ctx.get(), 1, NULL);
+        enc_ctx_init(&cipherEnv.cipher, d_ctx.get(), 0, NULL);
     }
     if (profile.remote_host)
         strcpy(_server_info.host, profile.remote_host);

@@ -196,7 +196,7 @@ typedef mbedtls_md_info_t digest_type_t;
 
     int enc_init(cipher_env_t* env, const char* pass, const char* method);
     void enc_release(cipher_env_t* env);
-    void enc_ctx_init(cipher_env_t* env, enc_ctx_t* ctx, int enc);
+    void enc_ctx_init(cipher_env_t *env, enc_ctx_t *ctx, int enc, void *iv);
     void enc_ctx_release(cipher_env_t* env, enc_ctx_t* ctx);
     int enc_get_iv_len(cipher_env_t* env);
     uint8_t* enc_get_key(cipher_env_t* env);
@@ -215,6 +215,8 @@ typedef mbedtls_md_info_t digest_type_t;
     int balloc(buffer_t* ptr, size_t capacity);
     int brealloc(buffer_t* ptr, size_t len, size_t capacity);
     void bfree(buffer_t* ptr);
+    buffer_t *buffer_alloc(size_t capacity);
+    void buffer_free(buffer_t **ptr);
 
     // extern cipher_env_t cipher_env;
 

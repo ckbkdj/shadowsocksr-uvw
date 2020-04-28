@@ -36,6 +36,8 @@ make
 | Protocols |
 | --------- | 
 | origin |
+| verify_simple |
+| auth_simple |
 | auth_sha1|
 | auth_sha1_v2 |
 | auth_sha1_v4 |
@@ -47,6 +49,8 @@ make
 | auth_chain_d |
 | auth_chain_e |
 | auth_chain_f |
+| auth_akarin_rand |
+| auth_akarin_spec_a (WIP) |
 
 ## obfuscators
 
@@ -70,5 +74,4 @@ shadowsocksr-uvw is under [GPLv3](LICENSE) licence. It's based on [uvw](https://
 | [libuv](https://github.com/libuv/libuv)   | MIT |
 | [libsodium](https://libsodium.org) | ISC |
 | [openssl](https://www.openssl.org/)| Apache|
-
 

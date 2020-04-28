@@ -5,6 +5,8 @@
 #include <stdint.h>
 #include <time.h>
 
+static const uint32_t g_endian_test = 1;
+
 int get_head_size(char* plaindata, int size, int def_size)
 {
     if (plaindata == NULL || size < 2)
@@ -91,4 +93,43 @@ void memintcopy_lt(void* mem, uint32_t val)
     ((uint8_t*)mem)[1] = (uint8_t)(val >> 8);
     ((uint8_t*)mem)[2] = (uint8_t)(val >> 16);
     ((uint8_t*)mem)[3] = (uint8_t)(val >> 24);
+}
+
+uint64_t shift128plus_next(shift128plus_ctx *ctx) {
+    uint64_t x = ctx->v[0];
+    uint64_t y = ctx->v[1];
+    ctx->v[0] = y;
+    x ^= x << 23;
+    x ^= (y ^ (x >> 17) ^ (y >> 26));
+    ctx->v[1] = x;
+    return x + y;
+}
+
+void shift128plus_init_from_bin(shift128plus_ctx *ctx, uint8_t *bin, int bin_size) {
+    uint8_t fill_bin[16] = { 0 };
+    memcpy(fill_bin, bin, bin_size);
+    if (*(uint8_t *)&g_endian_test == 1) {
+        memcpy(ctx, fill_bin, 16);
+    }
+    else {
+        i64_memcpy((uint8_t *)ctx, fill_bin);
+        i64_memcpy((uint8_t *)ctx + 8, fill_bin + 8);
+    }
+}
+
+void shift128plus_init_from_bin_datalen(shift128plus_ctx *ctx, uint8_t *bin, int bin_size, int datalen, int init_loop) {
+    uint8_t fill_bin[16] = { 0 };
+    memcpy(fill_bin, bin, bin_size);
+    fill_bin[0] = datalen;
+    fill_bin[1] = datalen >> 8;
+    if (*(uint8_t *)&g_endian_test == 1) {
+        memcpy(ctx, fill_bin, 16);
+    }
+    else {
+        i64_memcpy((uint8_t *)ctx, fill_bin);
+        i64_memcpy((uint8_t *)ctx + 8, fill_bin + 8);
+    }
+    for (int i = 0; i < init_loop; ++i) {
+        shift128plus_next(ctx);
+    }
 }

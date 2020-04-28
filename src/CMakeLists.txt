@@ -27,8 +27,12 @@ if (SSR_UVW_WITH_QT)
             obfs/obfs.c
             obfs/obfs.h
             obfs/base64.h
+            obfs/verify.h
+            obfs/verify.c
             obfs/auth_chain.h
             obfs/auth_chain.c
+            obfs/auth_akarin.h
+            obfs/auth_akarin.c
             obfs/http_simple.h
             obfs/obfsutil.c
             obfs/base64.c
@@ -72,8 +76,12 @@ else ()
             obfs/obfs.c
             obfs/obfs.h
             obfs/base64.h
+            obfs/verify.h
+            obfs/verify.c
             obfs/auth_chain.h
             obfs/auth_chain.c
+            obfs/auth_akarin.h
+            obfs/auth_akarin.c
             obfs/http_simple.h
             obfs/obfsutil.c
             obfs/base64.c

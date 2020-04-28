@@ -9,11 +9,6 @@
 #include <time.h>
 uint32_t g_endian_test = 1;
 
-typedef struct shift128plus_ctx
-{
-    uint64_t v[2];
-} shift128plus_ctx;
-
 void swap(int* x, int* y)
 {
     int t = *x;
@@ -69,50 +64,10 @@ int array_bin_search(int start, int end, int array[], int value)
     }
 }
 
-uint64_t shift128plus_next(shift128plus_ctx* ctx)
-{
-    uint64_t x = ctx->v[0];
-    uint64_t y = ctx->v[1];
-    ctx->v[0] = y;
-    x ^= x << 23;
-    x ^= (y ^ (x >> 17) ^ (y >> 26));
-    ctx->v[1] = x;
-    return x + y;
-}
-
 void i64_memcpy(uint8_t* target, uint8_t* source)
 {
     for (int i = 0; i < 8; ++i)
         target[i] = source[7 - i];
-}
-
-void shift128plus_init_from_bin(shift128plus_ctx* ctx, uint8_t* bin, int bin_size)
-{
-    uint8_t fill_bin[16] = { 0 };
-    memcpy(fill_bin, bin, bin_size);
-    if (*(uint8_t*)&g_endian_test == 1) {
-        memcpy(ctx, fill_bin, 16);
-    } else {
-        i64_memcpy((uint8_t*)ctx, fill_bin);
-        i64_memcpy((uint8_t*)ctx + 8, fill_bin + 8);
-    }
-}
-
-void shift128plus_init_from_bin_datalen(shift128plus_ctx* ctx, uint8_t* bin, int bin_size, int datalen, int init_loop)
-{
-    uint8_t fill_bin[16] = { 0 };
-    memcpy(fill_bin, bin, bin_size);
-    fill_bin[0] = datalen;
-    fill_bin[1] = datalen >> 8;
-    if (*(uint8_t*)&g_endian_test == 1) {
-        memcpy(ctx, fill_bin, 16);
-    } else {
-        i64_memcpy((uint8_t*)ctx, fill_bin);
-        i64_memcpy((uint8_t*)ctx + 8, fill_bin + 8);
-    }
-    for (int i = 0; i < init_loop; ++i) {
-        shift128plus_next(ctx);
-    }
 }
 
 static const int auth_chain_rand_init_loop = 4;
@@ -933,8 +888,8 @@ int auth_chain_a_pack_auth_data(auth_chain_global_data* global, server_info_t* s
     enc_init(&local->cipher, password, "rc4");
     local->cipher_client_ctx = malloc(sizeof(enc_ctx_t));
     local->cipher_server_ctx = malloc(sizeof(enc_ctx_t));
-    enc_ctx_init(&local->cipher, local->cipher_client_ctx, 1);
-    enc_ctx_init(&local->cipher, local->cipher_server_ctx, 0);
+    enc_ctx_init(&local->cipher, local->cipher_client_ctx, 1, NULL);
+    enc_ctx_init(&local->cipher, local->cipher_server_ctx, 0, NULL);
 
     out_size += auth_chain_a_pack_data(data, datalength, outdata + out_size, local, server);
 
@@ -1105,7 +1060,7 @@ int auth_chain_a_client_udp_pre_encrypt(obfs* self, char** pplaindata, int datal
     {
         enc_init(&local->cipher, password, "rc4");
         enc_ctx_t ctx;
-        enc_ctx_init(&local->cipher, &ctx, 1);
+        enc_ctx_init(&local->cipher, &ctx, 1, NULL);
         size_t out_len;
         ss_encrypt_buffer(&local->cipher, &ctx, plaindata, datalength, out_buffer, &out_len);
         enc_ctx_release(&local->cipher, &ctx);
@@ -1159,7 +1114,7 @@ int auth_chain_a_client_udp_post_decrypt(obfs* self, char** pplaindata, int data
     {
         enc_init(&local->cipher, password, "rc4");
         enc_ctx_t ctx;
-        enc_ctx_init(&local->cipher, &ctx, 0);
+        enc_ctx_init(&local->cipher, &ctx, 0, NULL);
         size_t out_len;
         ss_decrypt_buffer(&local->cipher, &ctx, plaindata, outlength, plaindata, &out_len);
         enc_ctx_release(&local->cipher, &ctx);

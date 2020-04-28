@@ -12,6 +12,11 @@ extern "C"
 #define VLA(TYPE, SIZE, NAME) TYPE* NAME = (TYPE*)malloc(sizeof(TYPE) * SIZE)
 #define VLA_FREE(NAME) free(NAME)
 #endif
+
+typedef struct shift128plus_ctx{
+    uint64_t v[2];
+}shift128plus_ctx;
+
     int get_head_size(char* plaindata, int size, int def_size);
 
     void init_shift128plus(void);
@@ -27,6 +32,12 @@ extern "C"
     int find_pos(int arr[], int length, int key);
 
     void memintcopy_lt(void* mem, uint32_t val);
+
+    uint64_t shift128plus_next(shift128plus_ctx *ctx);
+
+    void shift128plus_init_from_bin(shift128plus_ctx *ctx, uint8_t *bin, int bin_size);
+
+    void shift128plus_init_from_bin_datalen(shift128plus_ctx *ctx, uint8_t *bin, int bin_size, int datalen, int init_loop);
 
 #ifdef __cplusplus
 }
