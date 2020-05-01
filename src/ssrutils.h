@@ -52,6 +52,7 @@ extern "C"
 
 #define PORTSTRLEN 16
 #define SS_ADDRSTRLEN (INET6_ADDRSTRLEN + PORTSTRLEN + 1)
+struct tm* ssr_safe_localtime(time_t* t, struct tm* tp);
 
 #ifdef ANDROID
 
@@ -89,8 +90,9 @@ extern FILE* logfile;
     do {                                                                       \
         {                                                                      \
             time_t now = time(NULL);                                           \
+            struct tm tp;                                                      \
             char timestr[20];                                                  \
-            strftime(timestr, 20, TIME_FORMAT, localtime(&now));               \
+            strftime(timestr, 20, TIME_FORMAT, ssr_safe_localtime(&now, &tp)); \
             fprintf(stderr, " %s INFO: " format "\n", timestr, ##__VA_ARGS__); \
             fflush(stderr);                                                    \
         }                                                                      \
@@ -100,32 +102,35 @@ extern FILE* logfile;
     do {                                                                        \
         {                                                                       \
             time_t now = time(NULL);                                            \
+            struct tm tp;                                                       \
             char timestr[20];                                                   \
-            strftime(timestr, 20, TIME_FORMAT, localtime(&now));                \
+            strftime(timestr, 20, TIME_FORMAT, ssr_safe_localtime(&now, &tp));  \
             fprintf(stderr, " %s ERROR: " format "\n", timestr, ##__VA_ARGS__); \
             fflush(stderr);                                                     \
         }                                                                       \
     } while (0)
 
 #elif defined(SSR_UVW_WITH_QT)
-#define LOGI(format, ...)                                                \
-    do {                                                                 \
-        {                                                                \
-            time_t now = time(NULL);                                     \
-            char timestr[20];                                            \
-            strftime(timestr, 20, TIME_FORMAT, localtime(&now));         \
-            qt_ui_log_info(" %s INFO: " format, timestr, ##__VA_ARGS__); \
-        }                                                                \
+#define LOGI(format, ...)                                                      \
+    do {                                                                       \
+        {                                                                      \
+            time_t now = time(NULL);                                           \
+            struct tm tp;                                                      \
+            char timestr[20];                                                  \
+            strftime(timestr, 20, TIME_FORMAT, ssr_safe_localtime(&now, &tp)); \
+            qt_ui_log_info(" %s INFO: " format, timestr, ##__VA_ARGS__);       \
+        }                                                                      \
     } while (0)
 
-#define LOGE(format, ...)                                                  \
-    do {                                                                   \
-        {                                                                  \
-            time_t now = time(NULL);                                       \
-            char timestr[20];                                              \
-            strftime(timestr, 20, TIME_FORMAT, localtime(&now));           \
-            qt_ui_log_error(" %s ERROR: " format, timestr, ##__VA_ARGS__); \
-        }                                                                  \
+#define LOGE(format, ...)                                                       \
+    do {                                                                        \
+        {                                                                       \
+            time_t now = time(NULL);                                            \
+            struct tm tp;                                                       \
+            char timestr[20];                                                   \
+            strftime(timestr, 20, TIME_FORMAT, ssr_safe_localtime(&now, &tp));  \
+            qt_ui_log_error(" %s ERROR: " format, timestr, ##__VA_ARGS__);      \
+        }                                                                       \
     } while (0)
 
 #elif defined(_WIN32)
@@ -139,8 +144,9 @@ extern FILE* logfile;
 #define LOGI(format, ...)                                                  \
     do {                                                                   \
         time_t now = time(NULL);                                           \
+        struct tm tp;                                                      \
         char timestr[20];                                                  \
-        strftime(timestr, 20, TIME_FORMAT, localtime(&now));               \
+        strftime(timestr, 20, TIME_FORMAT, ssr_safe_localtime(&now, &tp)); \
         fprintf(stderr, " %s INFO: " format "\n", timestr, ##__VA_ARGS__); \
         fflush(stderr);                                                    \
     } while (0)
@@ -148,8 +154,9 @@ extern FILE* logfile;
 #define LOGE(format, ...)                                                   \
     do {                                                                    \
         time_t now = time(NULL);                                            \
+        struct tm tp;                                                       \
         char timestr[20];                                                   \
-        strftime(timestr, 20, TIME_FORMAT, localtime(&now));                \
+        strftime(timestr, 20, TIME_FORMAT, ssr_safe_localtime(&now, &tp));  \
         fprintf(stderr, " %s ERROR: " format "\n", timestr, ##__VA_ARGS__); \
         fflush(stderr);                                                     \
     } while (0)
@@ -183,8 +190,9 @@ extern int use_syslog;
             syslog(LOG_INFO, format, ##__VA_ARGS__);                                             \
         } else {                                                                                 \
             time_t now = time(NULL);                                                             \
+            struct tm tp;                                                                        \
             char timestr[20];                                                                    \
-            strftime(timestr, 20, TIME_FORMAT, localtime(&now));                                 \
+            strftime(timestr, 20, TIME_FORMAT, ssr_safe_localtime(&now, &tp));                   \
             if (use_tty) {                                                                       \
                 fprintf(stderr, "\e[01;32m %s INFO: \e[0m" format "\n", timestr, ##__VA_ARGS__); \
             } else {                                                                             \
@@ -200,7 +208,7 @@ extern int use_syslog;
         } else {                                                                                  \
             time_t now = time(NULL);                                                              \
             char timestr[20];                                                                     \
-            strftime(timestr, 20, TIME_FORMAT, localtime(&now));                                  \
+            strftime(timestr, 20, TIME_FORMAT, ssr_safe_localtime(&now, &tp));                    \
             if (use_tty) {                                                                        \
                 fprintf(stderr, "\e[01;35m %s ERROR: \e[0m" format "\n", timestr, ##__VA_ARGS__); \
             } else {                                                                              \
