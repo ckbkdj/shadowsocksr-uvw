@@ -240,8 +240,8 @@ private:
             int needsendback = buf.clientDecode(*obfsClass, ctx);
             if (needsendback) {
                 ctx.remoteBuf->clientEncode(*obfsClass, ctx, 0);
-                remote.once<uvw::WriteEvent>([&ctx](auto&, auto&) { ctx.remoteBuf->clear(); });
-                remote.write(ctx.remoteBuf->begin(), ctx.remoteBuf->length());
+                remote.write(ctx.remoteBuf->duplicateDataToArray(), ctx.remoteBuf->length());
+                ctx.remoteBuf->clear();
             }
             if (buf.length() > 0) {
                 int err = buf.ssDecrypt(*cipherEnv, ctx);
